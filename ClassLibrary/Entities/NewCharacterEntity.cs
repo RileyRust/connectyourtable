@@ -17,11 +17,11 @@ namespace ClassLibrary.Entities
     //
 
     [Table("character")] // Maps this class to the "character" table
-    public class CharacterEntity
+    public class NewCharacterEntity
     {
         [Key] // Primary key
         [Column("character_id")]
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
         [Column("name")]
         public string Name { get; set; } = string.Empty;

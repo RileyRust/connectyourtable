@@ -13,7 +13,7 @@
     // Think of DTOs as your API contract.
     //
 
-    public class CharacterDTO
+    public class NewCharacterDTO
     {
         public int Id { get; set; }
 

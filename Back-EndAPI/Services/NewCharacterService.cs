@@ -15,23 +15,23 @@ using Microsoft.EntityFrameworkCore;
 // This keeps controllers simple and testable.
 //
 
-public class CharacterService
+public class NewCharacterService
 {
     // Database context injected via Dependency Injection
     private readonly AppDbContext _db;
 
-    public CharacterService(AppDbContext db)
+    public NewCharacterService(AppDbContext db)
     {
         _db = db;
     }
 
     // Returns characters as DTOs (not entities)
-    public async Task<List<CharacterDTO>> GetCharactersAsync()
+    public async Task<List<NewCharacterDTO>> GetCharactersAsync()
     {
         // Query the database and PROJECT directly into DTOs
         // EF Core generates optimized SQL that selects only needed columns
         return await _db.Characters
-            .Select(e => new CharacterDTO
+            .Select(e => new NewCharacterDTO
             {
                 Id = e.Id,
                 Name = e.Name,

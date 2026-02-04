@@ -31,7 +31,7 @@ public class CharacterController : ControllerBase
     // GET: api/characters
     // Returns a list of characters to the client
     [HttpGet]
-    public async Task<ActionResult<List<CharacterDTO>>> GetCharacters()
+    public async Task<ActionResult<List<NewCharacterDTO>>> GetCharacters()
     {
         // Ask the service for character data
         var characters = await _characterService.GetCharactersAsync();
