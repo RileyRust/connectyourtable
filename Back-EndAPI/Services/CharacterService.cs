@@ -1,5 +1,6 @@
 ﻿using ClassLibrary.DTOs;
 using Microsoft.EntityFrameworkCore;
+using Back_EndAPI.Data;
 
 //
 // SERVICE ROLE

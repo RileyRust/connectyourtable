@@ -1,42 +1,55 @@
-﻿using ClassLibrary.DTOs;
+﻿using Back_EndAPI.Services;
+using ClassLibrary.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
-//
-// CONTROLLER ROLE
-// ----------------
-// Controllers are the "front door" of your backend.
-// They receive HTTP requests, call services to do the work,
-// and translate results into HTTP responses.
-//
-// Controllers should be THIN:
-// - No database logic
-// - No business rules
-// - No data transformation logic
-//
-
-[ApiController] // Enables automatic model validation & API behavior
-[Route("api/characters")] // Base route for this controller
-public class CharacterController : ControllerBase
+namespace Back_EndAPI.Controllers
 {
-    // Service that contains the business/data logic
-    private readonly CharacterService _characterService;
-
-    // Constructor Injection:
-    // ASP.NET gives us CharacterService automatically via Dependency Injection
-    public CharacterController(CharacterService characterService)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class CharacterController : ControllerBase
     {
-        _characterService = characterService;
-    }
+        private readonly ICharacterService _service;
 
-    // GET: api/characters
-    // Returns a list of characters to the client
-    [HttpGet]
-    public async Task<ActionResult<List<NewCharacterDTO>>> GetCharacters()
-    {
-        // Ask the service for character data
-        var characters = await _characterService.GetCharactersAsync();
+        public CharacterController(ICharacterService service)
+        {
+            _service = service;
+        }
 
-        // Return HTTP 200 OK with JSON data
-        return Ok(characters);
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+            => Ok(await _service.GetAll());
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            var result = await _service.Get(id);
+            if (result == null) return NotFound();
+            return Ok(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create(NewCharacterDTO dto)
+        {
+            var created = await _service.Create(dto);
+            return CreatedAtAction(nameof(Get), new { id = created.Id }, created);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, NewCharacterDTO dto)
+        {
+            if (!await _service.Update(id, dto))
+                return NotFound();
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            if (!await _service.Delete(id))
+                return NotFound();
+
+            return NoContent();
+        }
     }
 }

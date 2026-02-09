@@ -21,7 +21,7 @@ namespace ClassLibrary.Entities
     {
         [Key] // Primary key
         [Column("character_id")]
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
         [Column("name")]
         public string Name { get; set; } = string.Empty;

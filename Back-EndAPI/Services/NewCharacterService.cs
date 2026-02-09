@@ -1,80 +1,102 @@
-﻿using ClassLibrary.DTOs;
+﻿using Back_EndAPI.Data;
+using ClassLibrary.DTOs;
+using ClassLibrary.Entities;
 using Microsoft.EntityFrameworkCore;
 
-//
-// SERVICE ROLE
-// -------------
-// Services contain BUSINESS LOGIC and DATA ACCESS.
-// Controllers should never talk directly to the database.
-//
-// Services:
-// - Decide WHAT data to fetch
-// - Decide HOW data is shaped
-// - Return DTOs (safe for UI)
-//
-// This keeps controllers simple and testable.
-//
-
-public class NewCharacterService
+namespace Back_EndAPI.Services
 {
-    // Database context injected via Dependency Injection
-    private readonly AppDbContext _db;
-
-    public NewCharacterService(AppDbContext db)
+    public class CharacterService : ICharacterService
     {
-        _db = db;
-    }
+        private readonly AppDbContext _context;
 
-    // Returns characters as DTOs (not entities)
-    public async Task<List<NewCharacterDTO>> GetCharactersAsync()
-    {
-        // Query the database and PROJECT directly into DTOs
-        // EF Core generates optimized SQL that selects only needed columns
-        return await _db.Characters
-            .Select(e => new NewCharacterDTO
-            {
-                Id = e.Id,
-                Name = e.Name,
-                Class = e.Class,
-                Level = e.Level,
-                Health = e.Health,
-                Mana = e.Mana
-            })
-            .ToListAsync();
-    }
-
-    // Example: SAME DATA, but using raw SQL instead of EF LINQ
-    // This is for learning / reference purposes
-    public async Task<List<CharacterDTO>> GetCharactersWithSqlAsync()
-    {
-        var results = new List<CharacterDTO>();
-
-        // Get the raw database connection EF is using
-        using var conn = _db.Database.GetDbConnection();
-        await conn.OpenAsync();
-
-        // Create a SQL command
-        using var cmd = conn.CreateCommand();
-        cmd.CommandText = """
-            SELECT hero_id, name, class, level, health, mana
-            FROM character
-        """;
-
-        // Execute query and read results
-        using var reader = await cmd.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
+        public CharacterService(AppDbContext context)
         {
-            results.Add(new CharacterDTO
-            {
-                Id = reader.GetInt32(0),
-                Name = reader.GetString(1),
-                Class = reader.GetString(2),
-                Level = reader.GetInt32(3),
-                Health = reader.GetInt32(4),
-                Mana = reader.GetInt32(5)
-            });
+            _context = context;
         }
 
-        return results;
+        // GET ALL
+        public async Task<List<CharacterDTO>> GetAll()
+        {
+            return await _context.Characters
+                .Select(c => new CharacterDTO
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Class = c.Class,
+                    Level = c.Level,
+                    Health = c.Health,
+                    Mana = c.Mana
+                }).ToListAsync();
+        }
+
+        // GET ONE
+        public async Task<CharacterDTO?> Get(int id)
+        {
+            var c = await _context.Characters.FindAsync(id);
+            if (c == null) return null;
+
+            return new CharacterDTO
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Class = c.Class,
+                Level = c.Level,
+                Health = c.Health,
+                Mana = c.Mana
+            };
+        }
+
+        // CREATE
+        public async Task<CharacterDTO> Create(NewCharacterDTO dto)
+        {
+            var entity = new CharacterEntity
+            {
+                Name = dto.Name,
+                Class = dto.Class,
+                Level = dto.Level,
+                Health = dto.Health,
+                Mana = dto.Mana
+            };
+
+            _context.Characters.Add(entity);
+            await _context.SaveChangesAsync();
+
+            return new CharacterDTO
+            {
+                Id = entity.Id,
+                Name = entity.Name,
+                Class = entity.Class,
+                Level = entity.Level,
+                Health = entity.Health,
+                Mana = entity.Mana
+            };
+        }
+
+        // UPDATE
+        public async Task<bool> Update(int id, NewCharacterDTO dto)
+        {
+            var character = await _context.Characters.FindAsync(id);
+            if (character == null) return false;
+
+            character.Name = dto.Name;
+            character.Class = dto.Class;
+            character.Level = dto.Level;
+            character.Health = dto.Health;
+            character.Mana = dto.Mana;
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        // DELETE
+        public async Task<bool> Delete(int id)
+        {
+            var character = await _context.Characters.FindAsync(id);
+            if (character == null) return false;
+
+            _context.Characters.Remove(character);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }
