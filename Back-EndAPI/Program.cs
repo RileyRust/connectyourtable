@@ -1,5 +1,6 @@
-using Microsoft.EntityFrameworkCore;
 using Back_EndAPI.Data;
+using Back_EndAPI.Services;
+using Microsoft.EntityFrameworkCore;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,7 +25,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     ));
 
 // REGISTER YOUR HERO SERVICE
-builder.Services.AddScoped<CharacterService>();
+builder.Services.AddScoped<ICharacterService, Back_EndAPI.Services.CharacterService>();
 
 
 
